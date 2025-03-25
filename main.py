@@ -5,6 +5,8 @@ from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware 
 from typing import Optional
 from pydantic import BaseModel
+import logging
+
 
 app = FastAPI()
 
@@ -64,30 +66,42 @@ def get_tasks_by_student(student_id: int):
         return response.json()
     raise HTTPException(status_code=response.status_code, detail=response.text)
 
+
+
+
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+class Task(BaseModel):
+    task_id: str
+    student_id: int
+    educator_employee_id:int
+    description: str
+    due_date: str
+    status: str
+    feedback: str
+    program_id: int
+    title: str
+    priority: str
+    category: str
+    stage: str
+
 @app.post("/tasks")
-def insert_task(task_id: str, student_id: int, assigned_by: int, description: str, 
-                due_date: str, status: str, feedback: str, program_id: int, 
-                title: str, priority: str, category: str, stage: str):
-    payload = {
-        "task_id": task_id,
-        "student_id": student_id,
-        "assigned_by": assigned_by,
-        "description": description,
-        "due_date": due_date,
-        "status": status,
-        "created_at": datetime.utcnow().isoformat(),
-        "feedback": feedback,
-        "program_id": program_id,
-        "title": title,
-        "priority": priority,
-        "category": category,
-        "stage": stage,
-    }
+def insert_task(task: Task):
+    payload = task.dict()
+    payload["created_at"] = datetime.utcnow().isoformat()
+    
+    logging.info(f"Payload being sent: {payload}")
+    
     response = requests.post(f"{url}/goals_tasks", headers=headers, json=payload)
+    
     if response.status_code in [200, 201]:
         return {"message": "Task inserted successfully"}
+    
+    logging.error(f"Error response: {response.status_code} - {response.text}")
     raise HTTPException(status_code=response.status_code, detail=response.text)
-
 
 
 
@@ -121,3 +135,8 @@ def update_task(
         return {"message": "Task updated successfully"}
 
     raise HTTPException(status_code=response.status_code, detail=response.text)
+
+# Example of how to call the endpoint
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
