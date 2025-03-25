@@ -113,7 +113,7 @@ def update_task(
         raise HTTPException(status_code=400, detail="No update fields provided")
 
     # Supabase API expects filtering via `eq` inside the request body or URL
-    f_url = f"{url}/goals_tasks?id=eq.{task_id}"
+   f_url = f"{url}/goals_tasks?task_id=eq.{task_id}"
 
     response = requests.patch(f_url, headers=headers, json=json_data)
 
