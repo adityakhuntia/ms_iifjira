@@ -89,8 +89,9 @@ def insert_task(task_id: str, student_id: int, assigned_by: int, description: st
 
 @app.patch("/tasks/{task_id}")
 def update_task(task_id: str, due_date: Optional[str] = None, category: Optional[str] = None, 
-                 priority: Optional[str] = None, description: Optional[str] = None, 
-                 status: Optional[str] = None):
+                priority: Optional[str] = None, description: Optional[str] = None, 
+                status: Optional[str] = None):
+    
     json_data = {}
     if due_date:
         json_data["due_date"] = due_date
@@ -103,7 +104,17 @@ def update_task(task_id: str, due_date: Optional[str] = None, category: Optional
     if status:
         json_data["status"] = status
     
-    response = requests.patch(f"{url}/tasks/{task_id}", headers=headers, json=json_data)
+    if not json_data:
+        raise HTTPException(status_code=400, detail="No update fields provided")
+    
+    # Use the correct endpoint with query parameters
+    params = {
+        "task_id": f"eq.{task_id}"
+    }
+
+    response = requests.patch(f"{url}/goals_tasks", headers=headers, json=json_data, params=params)
+    
     if response.status_code in [200, 204]:
         return {"message": "Task updated successfully"}
+    
     raise HTTPException(status_code=response.status_code, detail=response.text)
