@@ -27,6 +27,8 @@ headers = {
     'Prefer': 'return=minimal',
 }
 
+
+
 @app.get("/student_ids")
 def get_student_ids():
     params = {'select': 'student_id'}
@@ -34,6 +36,25 @@ def get_student_ids():
     if response.status_code == 200:
         return [item["student_id"] for item in response.json()]
     raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
+@app.get("/students_assigned")
+def get_students_assigned(educator_employee_id: str):
+    """Fetch all student IDs assigned to a specific educator."""
+    params = {
+        "select": "student_id",
+        "educator_employee_id": f"eq.{educator_employee_id}"  # Filter by teacher ID
+    }
+    
+    response = requests.get(f"{url}/rest/v1/students", params=params, headers=headers)
+    
+    if response.status_code == 200:
+        return [item["student_id"] for item in response.json()]
+    
+    raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
+
 
 @app.get("/program_ids")
 def get_program_ids():
@@ -49,6 +70,8 @@ def get_all_tasks():
     if response.status_code == 200:
         return response.json()
     raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
 
 @app.get("/tasks/status/{status}")
 def get_tasks_by_status(status: str):
