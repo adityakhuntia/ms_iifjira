@@ -103,7 +103,7 @@ def update_task(task_id: str, due_date: Optional[str] = None, category: Optional
     if status:
         json_data["status"] = status
     
-    response = requests.patch(f"{url}/goals_tasks", headers=headers, json=json_data, params={"task_id": f"eq.{task_id}"})
+    response = requests.patch(f"{url}/tasks/{task_id}", headers=headers, json=json_data)
     if response.status_code in [200, 204]:
         return {"message": "Task updated successfully"}
     raise HTTPException(status_code=response.status_code, detail=response.text)
