@@ -2,8 +2,19 @@ from fastapi import FastAPI, HTTPException
 import requests
 from datetime import datetime
 from typing import List, Optional
+from fastapi.middleware.cors import CORSMiddleware 
+
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with frontend domain(s) for better security
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 url = "https://nizvcdssajfpjtncbojx.supabase.co/rest/v1"
 headers = {
