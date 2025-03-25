@@ -88,11 +88,16 @@ def insert_task(task_id: str, student_id: int, assigned_by: int, description: st
     raise HTTPException(status_code=response.status_code, detail=response.text)
 
 @app.patch("/tasks")
-def update_task(task_id: str, due_date: Optional[str] = None, category: Optional[str] = None, 
-                priority: Optional[str] = None, description: Optional[str] = None, 
-                status: Optional[str] = None):
-    
+def update_task(
+    task_id: str,
+    due_date: Optional[str] = None,
+    category: Optional[str] = None,
+    priority: Optional[str] = None,
+    description: Optional[str] = None,
+    status: Optional[str] = None
+):
     json_data = {}
+
     if due_date:
         json_data["due_date"] = due_date
     if category:
@@ -103,18 +108,16 @@ def update_task(task_id: str, due_date: Optional[str] = None, category: Optional
         json_data["description"] = description
     if status:
         json_data["status"] = status
-    
+
     if not json_data:
         raise HTTPException(status_code=400, detail="No update fields provided")
-    
-    # Corrected request format
-    params = {
-        "task_id": f"eq.{task_id}"
-    }
 
-    response = requests.patch(f"{url}/goals_tasks", headers=headers, json=json_data, params=params)
-    
+    # Supabase API expects filtering via `eq` inside the request body or URL
+    url = f"{url}/goals_tasks?id=eq.{task_id}"
+
+    response = requests.patch(url, headers=headers, json=json_data)
+
     if response.status_code in [200, 204]:
         return {"message": "Task updated successfully"}
-    
+
     raise HTTPException(status_code=response.status_code, detail=response.text)
