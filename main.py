@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 import requests
 from datetime import datetime
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware 
-
+from typing import Optional
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -88,29 +89,31 @@ def insert_task(task_id: str, student_id: int, assigned_by: int, description: st
     raise HTTPException(status_code=response.status_code, detail=response.text)
 
 
+
+
+class TaskUpdate(BaseModel):
+    due_date: Optional[str] = None
+    category: Optional[str] = None
+    priority: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+
 @app.patch("/tasks")
 def update_task(
-    task_id: str,
-    due_date: Optional[str] = None,
-    category: Optional[str] = None,
-    priority: Optional[str] = None,
-    description: Optional[str] = None,
-    status: Optional[str] = None ):
-    
-    json_data = {}
-    if due_date:
-        json_data["due_date"] = due_date
-    if category:
-        json_data["category"] = category
-    if priority:
-        json_data["priority"] = priority
-    if description:
-        json_data["description"] = description
-    if status:
-        json_data["status"] = status
+    task_id: str = Query(...),  # Extracting task_id from query parameters
+    update_data: TaskUpdate = None  # Accepting the update data as a Pydantic model
+):
+    # Log received parameters for debugging
+    print(f"Received task_id: {task_id}")
+    print(f"Received update data: {update_data}")
+
+    json_data = update_data.dict(exclude_unset=True)  # Convert to dict and exclude unset values
+
     if not json_data:
         raise HTTPException(status_code=400, detail="No update fields provided")
-    # Supabase API expects filtering via `eq` inside the request body or URL
+    
+    print(f"JSON data to send: {json_data}")
+    # Correct Supabase API filtering
     f_url = f"{url}/goals_tasks?task_id=eq.{task_id}"
     response = requests.patch(f_url, headers=headers, json=json_data)
 
