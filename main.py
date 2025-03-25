@@ -87,7 +87,7 @@ def insert_task(task_id: str, student_id: int, assigned_by: int, description: st
         return {"message": "Task inserted successfully"}
     raise HTTPException(status_code=response.status_code, detail=response.text)
 
-@app.patch("/tasks/{task_id}")
+@app.patch("/tasks")
 def update_task(task_id: str, due_date: Optional[str] = None, category: Optional[str] = None, 
                 priority: Optional[str] = None, description: Optional[str] = None, 
                 status: Optional[str] = None):
@@ -107,7 +107,7 @@ def update_task(task_id: str, due_date: Optional[str] = None, category: Optional
     if not json_data:
         raise HTTPException(status_code=400, detail="No update fields provided")
     
-    # Use the correct endpoint with query parameters
+    # Corrected request format
     params = {
         "task_id": f"eq.{task_id}"
     }
